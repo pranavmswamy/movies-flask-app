@@ -29,7 +29,7 @@ def getTrendingMovies():
     LIMIT = 0
     for movieDict in responseDict['results']:
         customResponse['trending_movies'].append({
-            "backdrop_path": "https://image.tmdb.org/t/p/w780" + movieDict["backdrop_path"],
+            "backdrop_path": "https://image.tmdb.org/t/p/w780" + movieDict["backdrop_path"] if movieDict["backdrop_path"] else "https://www.kindpng.com/picc/m/18-189751_movie-placeholder-hd-png-download.png",
             "genres": ", ".join([movie_genres_dict[num] for num in movieDict['genre_ids']]),
             "title": movieDict['title'],
             "overview": movieDict['overview'],
@@ -59,7 +59,7 @@ def getTVOnAirToday():
     LIMIT = 0
     for tvDict in responseDict['results']:
         customResponse['tv_airing_today'].append({
-            "backdrop_path": "https://image.tmdb.org/t/p/w780" + tvDict["backdrop_path"],
+            "backdrop_path": "https://image.tmdb.org/t/p/w780" + tvDict["backdrop_path"] if tvDict["backdrop_path"] else "https://www.kindpng.com/picc/m/18-189751_movie-placeholder-hd-png-download.png",
             "genres": ", ".join([tv_genres_dict[num] for num in tvDict['genre_ids']]),
             "name": tvDict['name'],
             "overview": tvDict['overview'],
@@ -73,11 +73,111 @@ def getTVOnAirToday():
 
     return customResponse
 
-    return requestResponse.json()
 
+# SEARCH PAGE - search endpoint
+@application.route('/search/<category>/<query>', methods=['GET'])
+def getSearchResults(category, query):
+    """
+    Method that returns search query details for a query
+    """
 
+    query = query.strip()
+    query = query.replace(" ", "%20")
+
+    url = ""
+    if category == "movie":
+        return searchMovies(query)
+    elif category == "tv":
+        return searchTV(query)
+    else:
+        return searchMoviesAndTV(query)
 
 # HELPER FUNCTIONS
+def searchMovies(query):
+    url = "https://api.themoviedb.org/3/search/movie?" + f"api_key={TMDB_API_KEY}&language=en-US&query={query}&page=1&include_adult=false"
+    
+    requestResponse = requests.get(url)
+    responseDict = requestResponse.json()
+    customResponse = {"search_results": list()}
+
+    LIMIT = 0
+    for movieDict in responseDict['results']:
+        customResponse['search_results'].append({
+            "poster_path": "https://image.tmdb.org/t/p/w185" + movieDict["poster_path"] if movieDict["poster_path"] else "https://cinemaone.net/images/movie_placeholder.png",
+            "genres": ", ".join([movie_genres_dict[num] for num in movieDict['genre_ids']]),
+            "name": movieDict['title'],
+            "overview": movieDict['overview'],
+            "release_date": movieDict["release_date"],
+            "vote_average": calculate_stars(movieDict["vote_average"]),
+            "vote_count": movieDict["vote_count"]
+        })
+        LIMIT += 1
+        if LIMIT == 10:
+            break
+
+    return customResponse
+
+def searchTV(query):
+    url = "https://api.themoviedb.org/3/search/tv?" + f"api_key={TMDB_API_KEY}&language=en-US&page=1&query={query}&include_adult=false"
+    requestResponse = requests.get(url)
+    responseDict = requestResponse.json()
+
+    customResponse = {"search_results": list()}
+    LIMIT = 0
+    for tvDict in responseDict['results']:
+        customResponse['search_results'].append({
+            "poster_path": "https://image.tmdb.org/t/p/w185" + tvDict["poster_path"] if tvDict["poster_path"] else "https://cinemaone.net/images/movie_placeholder.png",
+            "genres": ", ".join([tv_genres_dict[num] for num in tvDict['genre_ids']]),
+            "name": tvDict['name'],
+            "overview": tvDict['overview'],
+            "release_date": tvDict["first_air_date"],
+            "vote_average": calculate_stars(tvDict["vote_average"]),
+            "vote_count": tvDict["vote_count"]
+        })
+        LIMIT += 1
+        if LIMIT == 10:
+            break
+
+    return customResponse
+
+def searchMoviesAndTV(query):
+    url = "https://api.themoviedb.org/3/search/multi?" + f"api_key={TMDB_API_KEY}&language=en-US&query={query}&page=1&include_adult=false"
+    requestResponse = requests.get(url)
+    responseDict = requestResponse.json()
+
+    customResponse = {"search_results": list()}
+
+    LIMIT = 0
+    for entDict in responseDict['results']:
+        if entDict["media_type"] == "movie":
+            customResponse['search_results'].append({
+            "poster_path": "https://image.tmdb.org/t/p/w185" + entDict["poster_path"] if entDict["poster_path"] else "https://cinemaone.net/images/movie_placeholder.png",
+            "genres": ", ".join([movie_genres_dict[num] for num in entDict['genre_ids']]),
+            "name": entDict['title'],
+            "overview": entDict['overview'],
+            "release_date": entDict["release_date"],
+            "vote_average": calculate_stars(entDict["vote_average"]),
+            "vote_count": entDict["vote_count"]
+            })
+            LIMIT += 1
+        elif entDict["media_type"] == "tv":
+            customResponse['search_results'].append({
+            "poster_path": "https://image.tmdb.org/t/p/w185" + entDict["poster_path"] if entDict["poster_path"] else "https://cinemaone.net/images/movie_placeholder.png",
+            "genres": ", ".join([tv_genres_dict[num] for num in entDict['genre_ids']]),
+            "name": entDict['name'],
+            "overview": entDict['overview'],
+            "release_date": entDict["first_air_date"],
+            "vote_average": calculate_stars(entDict["vote_average"]),
+            "vote_count": entDict["vote_count"]
+            })
+            LIMIT += 1
+
+        if LIMIT == 10:
+            break
+
+    return customResponse
+
+
 def populate_genres_dict():
     # constructing the url
     global movie_genres_dict
