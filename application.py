@@ -92,6 +92,136 @@ def getSearchResults(category, query):
     else:
         return searchMoviesAndTV(query)
 
+@application.route('/movie/<movie_id>', methods=['GET'])
+def getMovieDetails(movie_id):
+    """
+    return all details about the movie.
+    """
+    # get details endpoint
+    # get credits endpoint
+    # get reviews endpoint
+    # get watch providers endpoint
+    customResponse = dict()
+
+    details_url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API_KEY}&language=en-US"
+    requestResponse = requests.get(details_url)
+    responseDict = requestResponse.json()
+
+    customResponse["backdrop_path"] = "https://image.tmdb.org/t/p/w780" + responseDict["backdrop_path"] if responseDict["backdrop_path"] else "https://www.kindpng.com/picc/m/18-189751_movie-placeholder-hd-png-download.png"
+    customResponse["genres"] = ", ".join([movie_genres_dict[num["id"]] for num in responseDict['genres']])
+    customResponse['id'] = responseDict["id"]
+    customResponse["title"] = responseDict["title"]
+    customResponse['overview'] = responseDict["overview"]
+    customResponse["poster_path"] = "https://image.tmdb.org/t/p/w185" + responseDict["poster_path"] if responseDict["poster_path"] else "https://cinemaone.net/images/movie_placeholder.png"
+    customResponse["release_date"] = responseDict["release_date"]
+    customResponse["runtime"] = responseDict["runtime"]
+    customResponse["spoken_languages"] = calculate_spoken_languages(responseDict["spoken_languages"])
+    customResponse["vote_average"] = calculate_stars(responseDict["vote_average"])
+    customResponse["vote_count"] = responseDict["vote_count"]
+
+    credits_url = f"https://api.themoviedb.org/3/movie/{movie_id}/credits?api_key={TMDB_API_KEY}&language=en-US"
+    requestResponse = requests.get(credits_url)
+    responseDict = requestResponse.json()
+
+    customResponse["actors"] = list()
+    LIMIT = 0
+    for actor in responseDict["cast"]:
+        customResponse["actors"].append({
+            "name": actor["name"],
+            "picture": "https://image.tmdb.org/t/p/w185" + actor["profile_path"] if actor["profile_path"] else "https://i1.wp.com/roanecountytn.gov/wp-content/uploads/2019/08/Placeholder-Person-1.jpg?ssl=1",
+            "character": actor["character"]
+        })
+        LIMIT += 1
+        if LIMIT == 8:
+            break
+    
+    reviews_url = f"https://api.themoviedb.org/3/movie/{movie_id}/reviews?api_key={TMDB_API_KEY}&language=en-US&page=1"
+    requestResponse = requests.get(reviews_url)
+    responseDict = requestResponse.json()
+
+    customResponse["reviews"] = list()
+    LIMIT = 0
+    for review in responseDict["results"]:
+        customResponse["reviews"].append({
+            "username": review["author_details"]["username"],
+            "rating": review["author_details"]["rating"],
+            "content": review["content"]
+        })
+
+        LIMIT += 1
+        if LIMIT == 5:
+            break
+    
+
+    return customResponse
+
+
+@application.route("/tv/<tv_id>", methods=['GET'])
+def getTVDetails(tv_id):
+    """
+    get JSON of details of a TV show with id tv_id.
+    """
+    # get details endpoint
+    # get credits endpoint
+    # get reviews endpoint
+    # get watch providers endpoint
+     
+    customResponse = dict()
+    
+    details_url = f"https://api.themoviedb.org/3/tv/{tv_id}?api_key={TMDB_API_KEY}&language=en-US"
+    requestResponse = requests.get(details_url)
+    responseDict = requestResponse.json()
+
+    customResponse["backdrop_path"] = "https://image.tmdb.org/t/p/w780" + responseDict["backdrop_path"] if responseDict["backdrop_path"] else "https://www.kindpng.com/picc/m/18-189751_movie-placeholder-hd-png-download.png"
+    customResponse["genres"] = ", ".join([tv_genres_dict[num["id"]] for num in responseDict['genres']])
+    customResponse['id'] = responseDict["id"]
+    customResponse["name"] = responseDict["name"]
+    customResponse['overview'] = responseDict["overview"]
+    customResponse["poster_path"] = "https://image.tmdb.org/t/p/w185" + responseDict["poster_path"] if responseDict["poster_path"] else "https://cinemaone.net/images/movie_placeholder.png"
+    customResponse["release_date"] = responseDict["first_air_date"]
+    customResponse["episode_run_time"] = responseDict["episode_run_time"]
+    customResponse["number_of_seasons"] = responseDict["number_of_seasons"]
+    customResponse["spoken_languages"] = calculate_spoken_languages(responseDict["spoken_languages"])
+    customResponse["vote_average"] = calculate_stars(responseDict["vote_average"])
+    customResponse["vote_count"] = responseDict["vote_count"]
+
+    credits_url = f"https://api.themoviedb.org/3/tv/{tv_id}/credits?api_key={TMDB_API_KEY}&language=en-US"
+    requestResponse = requests.get(credits_url)
+    responseDict = requestResponse.json()
+    
+    customResponse["actors"] = list()
+    LIMIT = 0
+    for actor in responseDict["cast"]:
+        customResponse["actors"].append({
+            "name": actor["name"],
+            "picture": "https://image.tmdb.org/t/p/w185" + actor["profile_path"] if actor["profile_path"] else "https://i1.wp.com/roanecountytn.gov/wp-content/uploads/2019/08/Placeholder-Person-1.jpg?ssl=1",
+            "character": actor["character"]
+        })
+        LIMIT += 1
+        if LIMIT == 8:
+            break
+    
+    reviews_url = "https://api.themoviedb.org/3/tv/1399/reviews?api_key=97588ddc4a26e3091152aa0c9a40de22&language=en-US&page=1"
+    requestResponse = requests.get(reviews_url)
+    responseDict = requestResponse.json()
+    customResponse["reviews"] = list()
+
+    LIMIT = 0
+    for review in responseDict["results"]:
+        customResponse["reviews"].append({
+            "username": review["author_details"]["username"],
+            "rating": review["author_details"]["rating"],
+            "content": review["content"]
+        })
+
+        LIMIT += 1
+        if LIMIT == 5:
+            break
+    
+
+    return customResponse
+
+
 # HELPER FUNCTIONS
 def searchMovies(query):
     url = "https://api.themoviedb.org/3/search/movie?" + f"api_key={TMDB_API_KEY}&language=en-US&query={query}&page=1&include_adult=false"
@@ -109,7 +239,8 @@ def searchMovies(query):
             "overview": movieDict['overview'],
             "release_date": movieDict["release_date"],
             "vote_average": calculate_stars(movieDict["vote_average"]),
-            "vote_count": movieDict["vote_count"]
+            "vote_count": movieDict["vote_count"],
+            "id": movieDict["id"]
         })
         LIMIT += 1
         if LIMIT == 10:
@@ -132,7 +263,8 @@ def searchTV(query):
             "overview": tvDict['overview'],
             "release_date": tvDict["first_air_date"],
             "vote_average": calculate_stars(tvDict["vote_average"]),
-            "vote_count": tvDict["vote_count"]
+            "vote_count": tvDict["vote_count"],
+            "id": tvDict["id"]
         })
         LIMIT += 1
         if LIMIT == 10:
@@ -157,7 +289,8 @@ def searchMoviesAndTV(query):
             "overview": entDict['overview'],
             "release_date": entDict["release_date"],
             "vote_average": calculate_stars(entDict["vote_average"]),
-            "vote_count": entDict["vote_count"]
+            "vote_count": entDict["vote_count"],
+            "id": entDict['id']
             })
             LIMIT += 1
         elif entDict["media_type"] == "tv":
@@ -168,7 +301,8 @@ def searchMoviesAndTV(query):
             "overview": entDict['overview'],
             "release_date": entDict["first_air_date"],
             "vote_average": calculate_stars(entDict["vote_average"]),
-            "vote_count": entDict["vote_count"]
+            "vote_count": entDict["vote_count"],
+            "id": entDict['id']
             })
             LIMIT += 1
 
@@ -196,6 +330,10 @@ def populate_genres_dict():
 def calculate_stars(rating):
     scaled_down_rating = float(rating) / 2
     return str(scaled_down_rating) 
+
+def calculate_spoken_languages(languages):
+    return ", ".join([language["english_name"] for language in languages])
+
 
 if __name__ == '__main__':
     populate_genres_dict()
