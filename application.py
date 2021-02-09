@@ -20,7 +20,7 @@ def getTrendingMovies():
 
     # constructing the url
     url = "https://api.themoviedb.org/3/trending/movie/week?"
-    url += f"api_key={ TMDB_API_KEY }"
+    url += f"api_key={TMDB_API_KEY}"
     
     requestResponse = requests.get(url)
     responseDict = requestResponse.json()
@@ -118,6 +118,7 @@ def getMovieDetails(movie_id):
     customResponse["spoken_languages"] = calculate_spoken_languages(responseDict["spoken_languages"])
     customResponse["vote_average"] = calculate_stars(responseDict["vote_average"])
     customResponse["vote_count"] = responseDict["vote_count"]
+    customResponse["homepage"] = responseDict["homepage"]
 
     credits_url = f"https://api.themoviedb.org/3/movie/{movie_id}/credits?api_key={TMDB_API_KEY}&language=en-US"
     requestResponse = requests.get(credits_url)
@@ -184,6 +185,7 @@ def getTVDetails(tv_id):
     customResponse["spoken_languages"] = calculate_spoken_languages(responseDict["spoken_languages"])
     customResponse["vote_average"] = calculate_stars(responseDict["vote_average"])
     customResponse["vote_count"] = responseDict["vote_count"]
+    customResponse["homepage"] = responseDict["homepage"]
 
     credits_url = f"https://api.themoviedb.org/3/tv/{tv_id}/credits?api_key={TMDB_API_KEY}&language=en-US"
     requestResponse = requests.get(credits_url)
@@ -337,4 +339,4 @@ def calculate_spoken_languages(languages):
 
 if __name__ == '__main__':
     populate_genres_dict()
-    application.run(port=5003)
+    application.run(debug=True, port=5003)
