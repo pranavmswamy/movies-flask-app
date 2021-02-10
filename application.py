@@ -223,7 +223,7 @@ def getTVDetails(tv_id):
 
     return customResponse
 
-
+    
 # HELPER FUNCTIONS
 def searchMovies(query):
     url = "https://api.themoviedb.org/3/search/movie?" + f"api_key={TMDB_API_KEY}&language=en-US&query={query}&page=1&include_adult=false"
