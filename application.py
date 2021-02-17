@@ -1,15 +1,13 @@
 from flask import Flask, request, render_template, url_for, jsonify
 import requests
+from datetime import *
+from dateutil.relativedelta import *
 
 TMDB_API_KEY = "97588ddc4a26e3091152aa0c9a40de22"
 movie_genres_dict = dict()
 tv_genres_dict = dict()
 
 application = Flask(__name__)
-
-@application.route('/', methods= ['GET'])
-def home():   
-    return application.send_static_file("hw3.html")
 
 # HOME PAGE - trending movies this week
 @application.route('/movies/get-trending-week', methods = ['GET'])
@@ -20,7 +18,7 @@ def getTrendingMovies():
 
     # constructing the url
     url = "https://api.themoviedb.org/3/trending/movie/week?"
-    url += f"api_key={TMDB_API_KEY}"
+    url += f"api_key={ TMDB_API_KEY }"
     
     requestResponse = requests.get(url)
     responseDict = requestResponse.json()
@@ -116,9 +114,8 @@ def getMovieDetails(movie_id):
     customResponse["release_date"] = responseDict["release_date"]
     customResponse["runtime"] = responseDict["runtime"]
     customResponse["spoken_languages"] = calculate_spoken_languages(responseDict["spoken_languages"])
-    customResponse["vote_average"] = calculate_stars(responseDict["vote_average"])
-    customResponse["vote_count"] = responseDict["vote_count"]
-    customResponse["homepage"] = responseDict["homepage"]
+    customResponse["vote_average"] = calculate_stars(responseDict["vote_average"]),
+    customResponse["vote_count"] = responseDict["vote_count"] 
 
     credits_url = f"https://api.themoviedb.org/3/movie/{movie_id}/credits?api_key={TMDB_API_KEY}&language=en-US"
     requestResponse = requests.get(credits_url)
@@ -145,9 +142,14 @@ def getMovieDetails(movie_id):
     for review in responseDict["results"]:
         customResponse["reviews"].append({
             "username": review["author_details"]["username"],
-            "rating": review["author_details"]["rating"],
-            "content": review["content"]
+            "rating": calculate_stars(review["author_details"]["rating"]),
+            "content": review["content"],
+            "created_at": datetime.strptime(review['created_at'][:10],"%Y-%m-%d" ).strftime("%m/%d/%Y") ,
         })
+
+
+
+        
 
         LIMIT += 1
         if LIMIT == 5:
@@ -176,7 +178,7 @@ def getTVDetails(tv_id):
     customResponse["backdrop_path"] = "https://image.tmdb.org/t/p/w780" + responseDict["backdrop_path"] if responseDict["backdrop_path"] else "https://www.kindpng.com/picc/m/18-189751_movie-placeholder-hd-png-download.png"
     customResponse["genres"] = ", ".join([tv_genres_dict[num["id"]] for num in responseDict['genres']])
     customResponse['id'] = responseDict["id"]
-    customResponse["name"] = responseDict["name"]
+    customResponse["title"] = responseDict["name"]
     customResponse['overview'] = responseDict["overview"]
     customResponse["poster_path"] = "https://image.tmdb.org/t/p/w185" + responseDict["poster_path"] if responseDict["poster_path"] else "https://cinemaone.net/images/movie_placeholder.png"
     customResponse["release_date"] = responseDict["first_air_date"]
@@ -185,7 +187,6 @@ def getTVDetails(tv_id):
     customResponse["spoken_languages"] = calculate_spoken_languages(responseDict["spoken_languages"])
     customResponse["vote_average"] = calculate_stars(responseDict["vote_average"])
     customResponse["vote_count"] = responseDict["vote_count"]
-    customResponse["homepage"] = responseDict["homepage"]
 
     credits_url = f"https://api.themoviedb.org/3/tv/{tv_id}/credits?api_key={TMDB_API_KEY}&language=en-US"
     requestResponse = requests.get(credits_url)
@@ -203,7 +204,7 @@ def getTVDetails(tv_id):
         if LIMIT == 8:
             break
     
-    reviews_url = "https://api.themoviedb.org/3/tv/1399/reviews?api_key=97588ddc4a26e3091152aa0c9a40de22&language=en-US&page=1"
+    reviews_url = f"https://api.themoviedb.org/3/tv/{tv_id}/reviews?api_key=97588ddc4a26e3091152aa0c9a40de22&language=en-US&page=1"
     requestResponse = requests.get(reviews_url)
     responseDict = requestResponse.json()
     customResponse["reviews"] = list()
@@ -212,8 +213,9 @@ def getTVDetails(tv_id):
     for review in responseDict["results"]:
         customResponse["reviews"].append({
             "username": review["author_details"]["username"],
-            "rating": review["author_details"]["rating"],
-            "content": review["content"]
+            "rating": calculate_stars(review["author_details"]["rating"]),
+            "content": review["content"],
+            "created_at": datetime.strptime(review['created_at'][:10],"%Y-%m-%d" ).strftime("%m/%d/%Y") ,
         })
 
         LIMIT += 1
@@ -223,7 +225,7 @@ def getTVDetails(tv_id):
 
     return customResponse
 
-    
+
 # HELPER FUNCTIONS
 def searchMovies(query):
     url = "https://api.themoviedb.org/3/search/movie?" + f"api_key={TMDB_API_KEY}&language=en-US&query={query}&page=1&include_adult=false"
@@ -242,7 +244,8 @@ def searchMovies(query):
             "release_date": movieDict["release_date"],
             "vote_average": calculate_stars(movieDict["vote_average"]),
             "vote_count": movieDict["vote_count"],
-            "id": movieDict["id"]
+            "id": movieDict["id"],
+            "media_type": "movie"
         })
         LIMIT += 1
         if LIMIT == 10:
@@ -266,7 +269,8 @@ def searchTV(query):
             "release_date": tvDict["first_air_date"],
             "vote_average": calculate_stars(tvDict["vote_average"]),
             "vote_count": tvDict["vote_count"],
-            "id": tvDict["id"]
+            "id": tvDict["id"],
+            "media_type": "tv"
         })
         LIMIT += 1
         if LIMIT == 10:
@@ -292,7 +296,8 @@ def searchMoviesAndTV(query):
             "release_date": entDict["release_date"],
             "vote_average": calculate_stars(entDict["vote_average"]),
             "vote_count": entDict["vote_count"],
-            "id": entDict['id']
+            "id": entDict['id'],
+            "media_type": "movie"
             })
             LIMIT += 1
         elif entDict["media_type"] == "tv":
@@ -304,7 +309,8 @@ def searchMoviesAndTV(query):
             "release_date": entDict["first_air_date"],
             "vote_average": calculate_stars(entDict["vote_average"]),
             "vote_count": entDict["vote_count"],
-            "id": entDict['id']
+            "id": entDict['id'],
+            "media_type": "tv"
             })
             LIMIT += 1
 
@@ -330,13 +336,27 @@ def populate_genres_dict():
     tv_genres_dict = { genre['id']: genre['name'] for genre in responseDict['genres']}
 
 def calculate_stars(rating):
-    scaled_down_rating = float(rating) / 2
-    return str(scaled_down_rating) 
+    if rating != None:
+        scaled_down_rating = float(rating) / 2
+        return str(scaled_down_rating) 
+    else:
+        return rating
 
 def calculate_spoken_languages(languages):
     return ", ".join([language["english_name"] for language in languages])
 
 
+
+@application.route('/', methods= ['GET'])
+def home():   
+    print("HEEEEEEEEEY")
+    home_movies = getTrendingMovies()
+    home_TV = getTVOnAirToday()
+    #print("home_movies:", home_movies)
+    #print("home_TV:", home_TV)
+    # home_movies=home_movies, home_TV=home_TV
+    return application.send_static_file("hw3.html",)
+
 if __name__ == '__main__':
     populate_genres_dict()
-    application.run(debug=True, port=5003)
+    application.run(debug=True)

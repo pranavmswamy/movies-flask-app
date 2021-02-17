@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+
+    <script>
+      /* Tabs - start */
+      function openTab(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+          tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+      }
+      /* Tabs - end */
+
+    </script>
+
+    <!-- charts -->
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/data.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
+    <script src="/static/la.js"></script>
+  </head>
+  <!--  -->
+  <body>
+
+    <div class="main" style="background-color: transparent ">
+      <div class="SearchHTML">
+        <form id="testform">
+          <h2 style="margin-left:110px;">Stock Search</h2>
+          <p>Enter Stock Ticker Symbol<em style="color:red">* &nbsp; </em> <input id="tickerInp" type="text"  required> </p> 
+          <div style="width:200px; margin-left:50px;">
+            <button type="submit" onclick="click_search()" style="float:left; " >Search</button>
+            <button type="button" onclick="click_clear()" style="float:right;">Clear</button>
+          </div>
+        </form>
+      </div>
+      <div style="height: 12px; background-color: #5f5fa8;"></div> 
+      <div style="height: 2px; background-color:  #e8e8e8;"></div>
+      <div style="height: 12px; background-color: #5f5fa8;"></div> 
+
+      
+      <!-- Tabs -->
+      <div id="ResultSection" style="visibility: collapse;">
+        <!-- hover - mouse, color change -->
+        <div style ="background-color:#e8e8e8; height: 30px;">
+          <div class="tab">
+            <button class="tablinks active" id ="tab1" onclick="openTab(event, 'CompanyOutlook')" style="width:110px;">Company Outlook</button>
+            <button class="tablinks" id ="tab2" onclick="openTab(event, 'StockSummary')" style="width:100px;">Stock Summary</button>
+            <button class="tablinks" id ="tab3" onclick="openTab(event, 'Charts')" style="width:60px;">Charts</button>
+            <button class="tablinks" id ="tab4" onclick="openTab(event, 'LatestNews')" style="width:80px;"> Latest News</button>
+          
+          </div>
+        </div>
+        <div style="height: 20px; background-color: #5f5fa8;"></div> <!-- sep -->
+        <!-- *********************************************************************** TAB 1 ************************************************************************ -->
+        <div id="CompanyOutlook" class="tabcontent" style="display: block;">        
+          <div class="view-table">
+            <div class="view-row">
+                <div class="view-type">Company Name</div>
+                <div class="view-name" id="1_name">A</div>                
+            </div>
+            <div class="view-row">
+              <div class="view-type">Stock Ticker Symbol</div>
+              <div class="view-name" id="1_ticker">B</div>                
+            </div>
+            <div class="view-row">
+              <div class="view-type">Stock Exchange Code</div>
+              <div class="view-name" id="1_exchangeCode">A</div>                
+          </div>
+          <div class="view-row">
+            <div class="view-type">Company Start Date</div>
+            <div class="view-name" id="1_startDate">B</div>                
+          </div>
+          <div class="view-row">
+              <div class="view-type">Description</div>
+              <div class="view-name" ><p id="1_description" style="margin:0px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;">B</p></div>                
+            </div>
+          </div>
+        </div>
+
+        <!-- *********************************************************************** TAB 2 ************************************************************************ -->
+        <div id="StockSummary" class="tabcontent" style="display: none;">
+          <div class="view-table">
+              <div class="view-row">
+                  <div class="view-type">Stock Ticker Symbol</div>
+                  <div class="view-name" id="2_ticker">A</div>                
+              </div>
+              <div class="view-row">
+                <div class="view-type">Trading Day</div>
+                <div class="view-name" id="2_timestamp">B</div>                
+              </div>
+              <div class="view-row">
+                <div class="view-type">Previous Closing Price</div>
+                <div class="view-name" id="2_prevClose">A</div>                
+            </div>
+            <div class="view-row">
+              <div class="view-type">Opening Price</div>
+              <div class="view-name" id="2_open">B</div>                
+            </div>
+            <div class="view-row">
+                <div class="view-type">High Price</div>
+                <div class="view-name" id="2_high">B</div>                
+            </div>
+            <div class="view-row">
+              <div class="view-type">Low Price</div>
+              <div class="view-name" id="2_low">B</div>                
+            </div>
+            <div class="view-row">
+                <div class="view-type">Last Price</div>
+                <div class="view-name" id="2_last">B</div>                
+            </div>
+            <div class="view-row">
+                <div class="view-type">Change</div>
+                <div class="view-name" id="2_change">A</div>                
+            </div>
+            <div class="view-row">
+              <div class="view-type">Change Percent</div>
+              <div class="view-name" id="2_percent">B</div>       
+            </div>
+            <div class="view-row">
+              <div class="view-type">Number of Shares Traded</div>
+              <div class="view-name" id="2_volume">B</div>       
+          </div>
+          </div>
+        </div>
+        
+        <!-- *********************************************************************** TAB 3 ************************************************************************ -->
+              
+        <div id="Charts" class="tabcontent" style="display: none;">
+          <div id="container" style="height: 400px; min-width: 310px"></div>
+        </div>
+
+        <!-- *********************************************************************** TAB 4 ************************************************************************ -->
+        <div id="LatestNews" class="tabcontent" style="display: none;">
+          <!-- 1 entry -->
+          <div class="view-table2" id="news1" style="visibility: collapse;"> <!--  style="visibility: collapse;" -->
+            <div class="view-row2">
+                <div class="view-type2">
+                  <img src="https://csci571.com/hw/hw6/images/RedArrowDown.jpg" id="4_urlToImage_1" alt="news">
+                </div>
+                <div class="view-name2" >
+                  <h4 style="font-weight: bold;" id="4_title_1">Heading</h5>
+                  <div>
+                    <p style="float:left;">Published Date:  </p>
+                    <p style="float:left;" id="4_publishedAt_1">01/01/2020</p>
+                  </div><br>
+                  <a id="4_url_1" target="_blank">See Original Post</a>  
+                </div>                
+            </div>
+            <div style="height: 15px; background-color: #5f5fa8;"></div> <!-- sep -->
+        </div>
+        <!-- 1 entry -->
+        <div class="view-table2" id="news2" style="visibility: collapse;"> <!--  style="visibility: collapse;" -->
+          <div class="view-row2">
+              <div class="view-type2">
+                <img src="https://csci571.com/hw/hw6/images/RedArrowDown.jpg" id="4_urlToImage_2" alt="news">
+              </div>
+              <div class="view-name2">
+                <h4 style="font-weight: bold;" id="4_title_2">Heading</h5>
+                <div>
+                  <p style="float:left;">Published Date:  </p>
+                  <p style="float:left;" id="4_publishedAt_2">01/01/2020</p>
+                </div><br>
+                <a id="4_url_2" target="_blank">See Original Post</a>  
+              </div>                
+          </div>
+          <div style="height: 15px; background-color: #5f5fa8;"></div> <!-- sep -->
+        </div>
+        <!-- 1 entry -->
+        <div class="view-table2" id="news3" style="visibility: collapse;">
+            <div class="view-row2">
+                <div class="view-type2">
+                  <img src="https://csci571.com/hw/hw6/images/RedArrowDown.jpg" id="4_urlToImage_3" alt="news">
+                </div>
+                <div class="view-name2" >
+                  <h4 style="font-weight: bold;" id="4_title_3">Heading</h5>
+                  <div>
+                    <p style="float:left;">Published Date:  </p>
+                    <p style="float:left;" id="4_publishedAt_3">01/01/2020</p>
+                  </div><br>
+                  <a id="4_url_3" target="_blank">See Original Post</a>  
+                </div>                
+            </div>
+            <div style="height: 15px; background-color: #5f5fa8;"></div> <!-- sep -->
+        </div>
+        <!-- 1 entry -->
+        <div class="view-table2" id="news4" style="visibility: collapse;">
+            <div class="view-row2">
+                <div class="view-type2">
+                  <img src="https://csci571.com/hw/hw6/images/RedArrowDown.jpg" id="4_urlToImage_4" alt="news">
+                </div>
+                <div class="view-name2" >
+                  <h4 style="font-weight: bold;" id="4_title_4">Heading</h5>
+                  <div>
+                    <p style="float:left;">Published Date:  </p>
+                    <p style="float:left;" id="4_publishedAt_4">01/01/2020</p>
+                  </div><br>
+                  <a id="4_url_4" target="_blank">See Original Post</a>  
+                </div>                
+            </div>
+            <div style="height: 15px; background-color: #5f5fa8;"></div> <!-- sep -->
+        </div>
+        <!-- 1 entry -->
+        <div class="view-table2" id="news5" style="visibility: collapse;">
+            <div class="view-row2">
+                <div class="view-type2">
+                  <img src="https://csci571.com/hw/hw6/images/RedArrowDown.jpg" id="4_urlToImage_5" alt="news">
+                </div>
+                <div class="view-name2" >
+                  <h4 style="font-weight: bold;" id="4_title_5">Heading</h5>
+                  <div>
+                    <p style="float:left;">Published Date:  </p>
+                    <p style="float:left;" id="4_publishedAt_5">01/01/2020</p>
+                  </div><br>
+                  <a id="4_url_5" target="_blank">See Original Post</a>  
+                </div>                
+            </div>
+            <div style="height: 15px; background-color: #5f5fa8;"></div> <!-- sep -->
+        </div>
+        <div style="height: 20px; background-color: #5f5fa8;"></div> <!-- sep -->
+      </div>
+    </div>
+    <!-- Error message -->
+    <div id="errorMessage" style="visibility: collapse;text-align: center; padding:20px;"><b>Error: No record has been found, please enter a valid symbol. </b></div>
+
+  </div>
+  
+
+  </body>
+</html>
