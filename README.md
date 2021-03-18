@@ -10,16 +10,16 @@ A Flask application that displays movie / tv show information to users.
 
 ## Screenshots
 
-<img src="https://github.com/pranavmswamy/movies-flask-app/blob/main/screenshots/pic_1.png" width="400">
+<img src="https://github.com/pranavmswamy/movies-flask-app/blob/main/screenshots/pic_1.png" width="700">
 
 
-<img src="https://github.com/pranavmswamy/movies-flask-app/blob/main/screenshots/pic_2.png" width="400">
+<img src="https://github.com/pranavmswamy/movies-flask-app/blob/main/screenshots/pic_2.png" width="700">
 
 
-<img src="https://github.com/pranavmswamy/movies-flask-app/blob/main/screenshots/pic_3.png" width="400">
+<img src="https://github.com/pranavmswamy/movies-flask-app/blob/main/screenshots/pic_3.png" width="700">
 
 
-<img src="https://github.com/pranavmswamy/movies-flask-app/blob/main/screenshots/pic_4.png" width="400">
+<img src="https://github.com/pranavmswamy/movies-flask-app/blob/main/screenshots/pic_4.png" width="700">
 
 
-<img src="https://github.com/pranavmswamy/movies-flask-app/blob/main/screenshots/pic_5.png" width="400">
+<img src="https://github.com/pranavmswamy/movies-flask-app/blob/main/screenshots/pic_5.png" width="700">
