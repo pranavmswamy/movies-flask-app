@@ -359,4 +359,4 @@ def home():
 
 if __name__ == '__main__':
     populate_genres_dict()
-    application.run(debug=True)
+    application.run(debug=True, port=5001)
